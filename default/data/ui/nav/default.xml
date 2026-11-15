@@ -1,0 +1,7 @@
+<application>
+  <nav>
+    <view name="cronbeat_overview" />
+    <view name="cronbeat_metrics" />
+    <search label="TA-cronbeat Events" search="search index=main sourcetype=cronbeat:status" />
+  </nav>
+</application>

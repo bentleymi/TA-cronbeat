@@ -1,0 +1,54 @@
+TA-cronbeat
+====
+
+Collects scheduled-job heartbeat data: all systemd timers (next elapsed, last elapsed, last-run timestamps) via systemctl list-timers, plus a count of cron jobs from /etc/crontab and /etc/cron.d. Emits JSON events to index=main (sourcetype cronbeat:status) and cronbeat.* metrics (timer totals, stale timers, cron job count) to index=metrics (sourcetype cronbeat:metrics), with dashboards.
+
+Prerequisites
+-------------
+  * systemd (list-timers); cron directories read directly if present
+  * Splunk Enterprise or Universal Forwarder 9.x - 10.6 (forwarder recommended
+    on monitored hosts).
+  * A metrics-typed index (default name: metrics) on the indexer:
+
+      [metrics]
+      datatype = metric
+
+    Forwarders only need that index to exist on the indexer side.
+  * No network egress, no root requirement beyond the Splunk service account.
+    Fully standalone add-on with no dependencies.
+
+Install
+-------
+Install on each monitored host (Apps > Install app from file, splunk install
+app, or deployment server), restart Splunk, then verify:
+
+  index=main sourcetype="cronbeat:status" | head
+
+Search quick reference
+----------------------
+  index=main sourcetype="cronbeat:status" | head
+  | mcatalog values(metric_name) where index=metrics metric_name="cronbeat.*" by host
+  | mstats avg("cronbeat.*") where index=metrics span=60s by host
+
+Usage
+-----
+Events: index=main sourcetype=cronbeat:status  (per-timer next/last elapsed; cron job count; stale flag)
+Metrics: cronbeat.timers_total, cronbeat.timers_stale, cronbeat.cron_jobs on index=metrics
+A timer whose 'last' is >24h old is flagged stale (alarm).
+Dashboards: TA-Cronbeat > Cronbeat Overview / Cronbeat Metrics
+
+Configure
+---------
+Override the interval or destination index in etc/apps/TA-cronbeat/local/inputs.conf
+(never edit default/).
+
+Troubleshooting
+---------------
+  * Stale = timer has a last-run but it is more than 24h old; never-run timers are not stale.
+  * cron_jobs counts lines matching a time field, skipping comments.
+
+License
+-------
+SOURCE-AVAILABLE (see LICENSE) - free personal, educational and evaluation
+use; commercial or production use requires a paid license from BentleyPC
+LLC (https://www.bentleypc.com).
