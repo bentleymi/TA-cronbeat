@@ -134,6 +134,8 @@ def discover():
 
 
 def metrics_payload(data):
+    if data.get("status") == "absent":
+        return {}
     payload = {
         "timers_total": data.get("timers_total"),
         "timers_stale": data.get("timers_stale"),

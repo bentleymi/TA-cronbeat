@@ -44,6 +44,7 @@
           <query>index=main sourcetype="cronbeat:status"
 | dedup host
 | spath input=_raw output=x path=stale_timers{}
+| where isnotnull(x) AND x!=""
 | mvexpand x
 | rename x as "unit"
 | table host "unit"</query>
