@@ -3,5 +3,6 @@
     <view name="cronbeat_overview" />
     <view name="cronbeat_metrics" />
     <search label="TA-cronbeat Events" search="search index=main sourcetype=cronbeat:status" />
+    <view name="license" />
   </nav>
 </application>
